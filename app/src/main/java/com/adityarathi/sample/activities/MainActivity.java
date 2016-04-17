@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.adityarathi.fastscroll.views.FastScrollRecyclerView;
 import com.adityarathi.sample.R;
 import com.adityarathi.sample.RecyclerItemClickListener;
-import com.adityarathi.sample.adapters.SearchListAdapter;
+import com.adityarathi.sample.adapters.UserRecyclerViewAdapter;
 import com.adityarathi.sample.objects.UserObject;
 
 import java.io.BufferedReader;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Bind(R.id.recycler_view) FastScrollRecyclerView mRecyclerView;
 
-    private SearchListAdapter mAdapter;
+    private UserRecyclerViewAdapter mAdapter;
     private List<UserObject> mModels;
 
     private LinkedHashMap<UserObject, String> searchableStringDataMap;
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         //initializing recycler view with no data in adapter
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mModels = new ArrayList<>();
-        mAdapter = new SearchListAdapter(MainActivity.this, mModels, 0, !allLoaded);
+        mAdapter = new UserRecyclerViewAdapter(MainActivity.this, mModels, 0, !allLoaded);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.scrollToPosition(0);
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             ++k;
         }
 
-        mAdapter = new SearchListAdapter(MainActivity.this, mModels, filterType, !allLoaded);
+        mAdapter = new UserRecyclerViewAdapter(MainActivity.this, mModels, filterType, !allLoaded);
         mRecyclerView.setAdapter(mAdapter);
 
     }

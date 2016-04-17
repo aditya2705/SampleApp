@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SearchListAdapter extends HeaderFooterRecyclerViewAdapter implements FastScrollRecyclerView.SectionedAdapter {
+public class UserRecyclerViewAdapter extends HeaderFooterRecyclerViewAdapter implements FastScrollRecyclerView.SectionedAdapter {
 
 
     private final LayoutInflater mInflater;
@@ -24,7 +24,7 @@ public class SearchListAdapter extends HeaderFooterRecyclerViewAdapter implement
     private int filterType;
     private boolean footer;
 
-    public SearchListAdapter(Context context, List<UserObject> models, int filterType, boolean footer) {
+    public UserRecyclerViewAdapter(Context context, List<UserObject> models, int filterType, boolean footer) {
         mInflater = LayoutInflater.from(context);
         mModels = new ArrayList<>(models);
         this.filterType = filterType;
@@ -32,14 +32,14 @@ public class SearchListAdapter extends HeaderFooterRecyclerViewAdapter implement
     }
 
     @Override
-    protected SearchItemViewHolder onCreateContentItemViewHolder(ViewGroup parent, int contentViewType) {
+    protected UserItemViewHolder onCreateContentItemViewHolder(ViewGroup parent, int contentViewType) {
         final View itemView = mInflater.inflate(R.layout.list_item, parent, false);
-        return new SearchItemViewHolder(itemView);
+        return new UserItemViewHolder(itemView);
     }
 
     @Override
     protected void onBindContentItemViewHolder(RecyclerView.ViewHolder contentViewHolder, int position) {
-        SearchItemViewHolder holder = (SearchItemViewHolder)contentViewHolder;
+        UserItemViewHolder holder = (UserItemViewHolder)contentViewHolder;
         final UserObject model = mModels.get(position);
         holder.bind(model);
     }
@@ -130,7 +130,7 @@ public class SearchListAdapter extends HeaderFooterRecyclerViewAdapter implement
     protected RecyclerView.ViewHolder onCreateFooterItemViewHolder(ViewGroup parent, int footerViewType) {
         if(footer) {
             final View itemView = mInflater.inflate(R.layout.footer, parent, false);
-            return new SearchItemViewHolder(itemView);
+            return new UserItemViewHolder(itemView);
         }
         return null;
     }
@@ -157,11 +157,11 @@ public class SearchListAdapter extends HeaderFooterRecyclerViewAdapter implement
 
 }
 
-class SearchItemViewHolder extends RecyclerView.ViewHolder {
+class UserItemViewHolder extends RecyclerView.ViewHolder {
 
     private final TextView profileNameText, userNameTextView;
 
-    public SearchItemViewHolder(View itemView) {
+    public UserItemViewHolder(View itemView) {
         super(itemView);
         profileNameText = (TextView) itemView.findViewById(R.id.name);
         userNameTextView = (TextView) itemView.findViewById(R.id.username);
