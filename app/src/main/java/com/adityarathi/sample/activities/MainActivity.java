@@ -5,17 +5,15 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.JsonReader;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adityarathi.fastscroll.views.FastScrollRecyclerView;
@@ -23,7 +21,6 @@ import com.adityarathi.sample.R;
 import com.adityarathi.sample.RecyclerItemClickListener;
 import com.adityarathi.sample.adapters.SearchListAdapter;
 import com.adityarathi.sample.objects.UserObject;
-import com.rey.material.widget.ProgressView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,6 +48,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private static final String TAG_FIELD_2 = "lastname";
     private static final String TAG_FIELD_3 = "username";
 
+    private static final int FILTER_BY_FIRST_NAME = 0;
+    private static final int FILTER_BY_LAST_NAME = 1;
+    private static final int FILTER_BY_USER_NAME = 2;
+
     @Bind(R.id.recycler_view) FastScrollRecyclerView mRecyclerView;
 
     private SearchListAdapter mAdapter;
@@ -60,8 +61,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private ArrayList<UserObject> userObjectArrayList = new ArrayList<>();
 
     public ProgressDialog progressDialog;
-
-    private String listJsonString;
 
     private boolean noNetworkFlag = false;
 
@@ -91,12 +90,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 }
             }
         }));
-        //recycler initialized
 
+        //progress dialog instantiated
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading...");
         progressDialog.setCancelable(false);
 
+        //fetch from URL directly on activity launch
         getDataFromURL();
 
     }
@@ -120,13 +120,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         switch (id){
             case R.id.menu_1:
-                setupRecyclerView(0);
+                setupRecyclerView(FILTER_BY_FIRST_NAME);
                 break;
             case R.id.menu_2:
-                setupRecyclerView(1);
+                setupRecyclerView(FILTER_BY_LAST_NAME);
                 break;
             case R.id.menu_3:
-                setupRecyclerView(2);
+                setupRecyclerView(FILTER_BY_USER_NAME);
                 break;
         }
 
@@ -178,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     con.setRequestProperty("Content-Type", "application/json");
                     inputStream = con.getInputStream();
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 16);
+
+                    //json reader for controlling loading
                     jsonReader = new JsonReader(bufferedReader);
 
                     jsonReader.beginObject();
@@ -205,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 super.onPostExecute(result);
                 progressDialog.dismiss();
                 if(!noNetworkFlag)
-                    setupRecyclerView(0);
+                    setupRecyclerView(FILTER_BY_FIRST_NAME);
                 else
                     Toast.makeText(MainActivity.this, "Check Internet connection and try again.", Toast.LENGTH_LONG).show();
 
@@ -258,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             protected void onPostExecute(String result) {
                 super.onPostExecute(result);
                 if(!noNetworkFlag)
-                    setupRecyclerView(0);
+                    setupRecyclerView(FILTER_BY_FIRST_NAME);
 
             }
 
@@ -312,13 +314,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         for (UserObject userObject : userObjectArrayList) {
             String s = "";
             switch (filterType){
-                case 0:
+                case FILTER_BY_FIRST_NAME:
                     s = userObject.getFirst_name();
                     break;
-                case 1:
+                case FILTER_BY_LAST_NAME:
                     s = userObject.getLast_name();
                     break;
-                case 2:
+                case FILTER_BY_USER_NAME:
                     s = userObject.getUser_name();
                     break;
             }
@@ -338,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     }
 
+    //sorting the user objects linkedhashmap
     public LinkedHashMap sortHashMapByValuesD(HashMap passedMap) {
         List mapKeys = new ArrayList(passedMap.keySet());
         List mapValues = new ArrayList(passedMap.values());
@@ -373,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return sortedMap;
     }
 
-
+    //simple checking for network
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

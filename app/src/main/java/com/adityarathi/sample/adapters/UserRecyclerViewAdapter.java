@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
 import com.adityarathi.fastscroll.views.FastScrollRecyclerView;
 import com.adityarathi.sample.R;
 import com.adityarathi.sample.objects.UserObject;
