@@ -1,0 +1,25 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/appThemeColor</item>
+        <item name="colorPrimaryDark">@color/appThemeColorDark</item>
+        <item name="colorAccent">@color/appThemeColorLight</item>
+    </style>
+
+    <style name="CustomProgress" parent="Material.Widget.ProgressView.Circular">
+        <item name="pv_progressMode">indeterminate</item>
+        <item name="pv_circular">true</item>
+        <item name="pv_autostart">true</item>
+        <item name="pv_progressStyle">@style/CustomProgressDrawable</item>
+    </style>
+
+    <style name="CustomProgressDrawable" parent="Material.Drawable.CircularProgress">
+        <item name="cpd_inAnimDuration">400</item>
+        <item name="cpd_outAnimDuration">400</item>
+        <item name="cpd_strokeColors">@array/progressStrokeColors</item>
+        <item name="cpd_strokeSize">7dp</item>
+    </style>
+
+</resources>

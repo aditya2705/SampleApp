@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search_white"
+        android:title="Search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/menu_1"
+        android:orderInCategory="1"
+        app:showAsAction="never"
+        android:title="First Name Filter"/>
+
+    <item
+        android:id="@+id/menu_2"
+        android:orderInCategory="2"
+        app:showAsAction="never"
+        android:title="Last Name Filter"/>
+
+    <item
+        android:id="@+id/menu_3"
+        android:orderInCategory="3"
+        app:showAsAction="never"
+        android:title="User Name Filter"/>
+
+
+
+</menu>
