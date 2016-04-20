@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.adityarathi.fastscroll.views.FastScrollRecyclerView;
 import com.adityarathi.sample.R;
 import com.adityarathi.sample.objects.UserObject;
 
@@ -16,36 +15,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UserRecyclerViewAdapter extends HeaderFooterRecyclerViewAdapter implements FastScrollRecyclerView.SectionedAdapter {
+public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserItemViewHolder>{
 
 
     private final LayoutInflater mInflater;
     private final List<UserObject> mModels;
-    private int filterType;
-    private boolean footer;
 
-    public UserRecyclerViewAdapter(Context context, List<UserObject> models, int filterType, boolean footer) {
+    public UserRecyclerViewAdapter(Context context, List<UserObject> models) {
         mInflater = LayoutInflater.from(context);
         mModels = new ArrayList<>(models);
-        this.filterType = filterType;
-        this.footer = footer;
     }
 
     @Override
-    protected UserItemViewHolder onCreateContentItemViewHolder(ViewGroup parent, int contentViewType) {
+    public UserItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View itemView = mInflater.inflate(R.layout.list_item, parent, false);
         return new UserItemViewHolder(itemView);
     }
 
     @Override
-    protected void onBindContentItemViewHolder(RecyclerView.ViewHolder contentViewHolder, int position) {
-        UserItemViewHolder holder = (UserItemViewHolder)contentViewHolder;
+    public void onBindViewHolder(UserItemViewHolder holder, int position) {
         final UserObject model = mModels.get(position);
         holder.bind(model);
     }
 
     @Override
-    public int getContentItemCount() {
+    public int getItemCount() {
         return mModels.size();
     }
 
@@ -103,56 +97,6 @@ public class UserRecyclerViewAdapter extends HeaderFooterRecyclerViewAdapter imp
     public UserObject getItem(int position) {
 
         return mModels.get(position);
-    }
-
-    @NonNull
-    @Override
-    public String getSectionName(int position) {
-        if(position < getContentItemCount()) {
-            switch (filterType) {
-                case 0:
-                    return mModels.get(position).getFirst_name().substring(0, 1);
-                case 1:
-                    return mModels.get(position).getLast_name().substring(0, 1);
-                case 2:
-                    return mModels.get(position).getUser_name().substring(0, 1);
-            }
-        }
-        return "";
-    }
-
-    @Override
-    protected int getFooterItemCount() {
-        return footer?1:0;
-    }
-
-    @Override
-    protected RecyclerView.ViewHolder onCreateFooterItemViewHolder(ViewGroup parent, int footerViewType) {
-        if(footer) {
-            final View itemView = mInflater.inflate(R.layout.footer, parent, false);
-            return new UserItemViewHolder(itemView);
-        }
-        return null;
-    }
-
-    @Override
-    protected void onBindFooterItemViewHolder(RecyclerView.ViewHolder footerViewHolder, int position) {
-
-    }
-
-    @Override
-    protected RecyclerView.ViewHolder onCreateHeaderItemViewHolder(ViewGroup parent, int headerViewType) {
-        return null;
-    }
-
-    @Override
-    protected void onBindHeaderItemViewHolder(RecyclerView.ViewHolder headerViewHolder, int position) {
-
-    }
-
-    @Override
-    protected int getHeaderItemCount() {
-        return 0;
     }
 
 }

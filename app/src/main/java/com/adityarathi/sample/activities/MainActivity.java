@@ -8,7 +8,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.JsonReader;
 import android.view.Menu;
@@ -16,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.adityarathi.fastscroll.views.FastScrollRecyclerView;
 import com.adityarathi.sample.R;
 import com.adityarathi.sample.RecyclerItemClickListener;
 import com.adityarathi.sample.adapters.UserRecyclerViewAdapter;
@@ -38,6 +39,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
@@ -52,21 +54,28 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private static final int FILTER_BY_LAST_NAME = 1;
     private static final int FILTER_BY_USER_NAME = 2;
 
-    @Bind(R.id.recycler_view) FastScrollRecyclerView mRecyclerView;
+    private static final int LOADING_FREQUENCY = 5;
+
+    private static final int CONNECTION_TIMEOUT = 20000;
+
+    @Bind(R.id.recycler_view) RecyclerView mRecyclerView;
+    @Bind(R.id.btn_retry) AppCompatButton retryButton;
 
     private UserRecyclerViewAdapter mAdapter;
     private List<UserObject> mModels;
 
     private LinkedHashMap<UserObject, String> searchableStringDataMap;
     private ArrayList<UserObject> userObjectArrayList = new ArrayList<>();
+    private ArrayList<UserObject> displayArrayList = new ArrayList<>();
 
     public ProgressDialog progressDialog;
 
     private boolean noNetworkFlag = false;
 
     private JsonReader jsonReader;
-    private final int loadingFrequency = 5;
     private boolean allLoaded = false;
+    private int currentPage = 0;
+    private int lastPagePointer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,18 +85,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         //initializing recycler view with no data in adapter
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mModels = new ArrayList<>();
-        mAdapter = new UserRecyclerViewAdapter(MainActivity.this, mModels, 0, !allLoaded);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.scrollToPosition(0);
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(position < mAdapter.getContentItemCount())
-                    Toast.makeText(MainActivity.this,"Tapped on "+mAdapter.getItem(position).getFirst_name(),Toast.LENGTH_SHORT).show();
-                else{
-                    loadMore();
-                }
+                Toast.makeText(MainActivity.this,mAdapter.getItem(position).getFirst_name()+
+                        " "+mAdapter.getItem(position).getLast_name(),Toast.LENGTH_SHORT).show();
             }
         }));
 
@@ -99,6 +101,48 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         //fetch from URL directly on activity launch
         getDataFromURL();
 
+    }
+
+    @OnClick(R.id.btn_next)
+    public void onNextClick() {
+
+        if(!allLoaded) {
+            ++currentPage;
+            loadMore();
+        }else if(currentPage<lastPagePointer){
+            displayArrayList = new ArrayList<>();
+            int startPointer = (currentPage+1)*LOADING_FREQUENCY;
+            int k=0;
+            while (k<LOADING_FREQUENCY && startPointer<userObjectArrayList.size()){
+                displayArrayList.add(userObjectArrayList.get(startPointer++));
+                ++k;
+            }
+            setupRecyclerView(FILTER_BY_FIRST_NAME);
+            ++currentPage;
+        }
+    }
+
+    @OnClick(R.id.btn_previous)
+    public void onPreviousClick() {
+        if(currentPage>0) {
+            displayArrayList = new ArrayList<>();
+            int startPointer = (currentPage-1)*LOADING_FREQUENCY;
+            int k=0;
+            while (k<LOADING_FREQUENCY && startPointer<userObjectArrayList.size()){
+                displayArrayList.add(userObjectArrayList.get(startPointer++));
+                ++k;
+            }
+            setupRecyclerView(FILTER_BY_FIRST_NAME);
+            --currentPage;
+        }
+    }
+
+    @OnClick(R.id.btn_retry)
+    public void onRetryClick(){
+        if(jsonReader!=null)
+            loadMore();
+        else
+            getDataFromURL();
     }
 
     @Override
@@ -176,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
                     //add request header
                     con.setRequestProperty("Content-Type", "application/json");
+                    con.setConnectTimeout(CONNECTION_TIMEOUT);
                     inputStream = con.getInputStream();
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 16);
 
@@ -186,18 +231,20 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     if(jsonReader.nextName().equals(TAG_RESULTS)){
                         jsonReader.beginArray();
                         int k=0;
-                        while (jsonReader.hasNext()&& k < loadingFrequency){
-                            userObjectArrayList.add(getUserObject(jsonReader));
+                        while (jsonReader.hasNext()&& k < LOADING_FREQUENCY){
+                            displayArrayList.add(getUserObject(jsonReader));
                             ++k;
                         }
                     }
 
-                } catch (Exception e) {
-                } finally {
+                }catch (Exception e) {
+
+                    Toast.makeText(MainActivity.this,"There was an error",Toast.LENGTH_SHORT).show();
+
+                }finally {
                     try {
                         if (inputStream != null) inputStream.close();
-                    } catch (Exception squish) {
-                    }
+                    } catch (Exception squish) {}
                 }
                 return result;
             }
@@ -210,6 +257,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     setupRecyclerView(FILTER_BY_FIRST_NAME);
                 else
                     Toast.makeText(MainActivity.this, "Check Internet connection and try again.", Toast.LENGTH_LONG).show();
+
+                if(displayArrayList.size()!=0)
+                    userObjectArrayList.addAll(displayArrayList);
+                else
+                    retryButton.setVisibility(View.VISIBLE);
 
 
             }
@@ -235,22 +287,25 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             protected String doInBackground(String... params) {
 
-                URL obj = null;
+                displayArrayList = new ArrayList<>();
                 String result = null;
 
                 try {
                     int k=0;
-                    while (jsonReader.hasNext()&& k < loadingFrequency){
-                        userObjectArrayList.add(getUserObject(jsonReader));
+                    while (jsonReader.hasNext()&& k < LOADING_FREQUENCY){
+                        displayArrayList.add(getUserObject(jsonReader));
                         ++k;
                     }
 
                     if(!jsonReader.hasNext()){
                         allLoaded = true;
+                        lastPagePointer = currentPage;
                     }
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }catch (Exception e) {
+
+                    Toast.makeText(MainActivity.this,"There was an error",Toast.LENGTH_SHORT).show();
+
                 }
 
                 return result;
@@ -259,14 +314,20 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             protected void onPostExecute(String result) {
                 super.onPostExecute(result);
+                progressDialog.dismiss();
                 if(!noNetworkFlag)
                     setupRecyclerView(FILTER_BY_FIRST_NAME);
+
+                if(displayArrayList.size()!=0)
+                    userObjectArrayList.addAll(displayArrayList);
 
             }
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                progressDialog.setTitle("Loading...");
+                progressDialog.show();
                 if (!isNetworkAvailable())
                     noNetworkFlag = true;
                 else
@@ -311,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         searchableStringDataMap = new LinkedHashMap<>();
 
-        for (UserObject userObject : userObjectArrayList) {
+        for (UserObject userObject : displayArrayList) {
             String s = "";
             switch (filterType){
                 case FILTER_BY_FIRST_NAME:
@@ -335,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             ++k;
         }
 
-        mAdapter = new UserRecyclerViewAdapter(MainActivity.this, mModels, filterType, !allLoaded);
+        mAdapter = new UserRecyclerViewAdapter(MainActivity.this, mModels);
         mRecyclerView.setAdapter(mAdapter);
 
     }

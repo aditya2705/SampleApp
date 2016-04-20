@@ -1,6 +1,8 @@
 package com.adityarathi.sample.objects;
 
-public class UserObject {
+import java.io.Serializable;
+
+public class UserObject implements Serializable {
 
     private String first_name, last_name, user_name;
 

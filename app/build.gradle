@@ -26,5 +26,4 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.intuit.sdp:sdp-android:1.0.2'
     compile 'com.github.rey5137:material:1.2.2'
-    compile project(':fastscroll')
 }
