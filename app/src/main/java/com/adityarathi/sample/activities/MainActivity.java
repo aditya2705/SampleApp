@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Bind(R.id.recycler_view) RecyclerView mRecyclerView;
     @Bind(R.id.btn_retry) AppCompatButton retryButton;
+    @Bind(R.id.btn_next) AppCompatButton nextButton;
+    @Bind(R.id.btn_previous) AppCompatButton previousButton;
 
     private UserRecyclerViewAdapter mAdapter;
     private List<UserObject> mModels;
@@ -139,6 +141,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @OnClick(R.id.btn_retry)
     public void onRetryClick(){
+        retryButton.setVisibility(View.GONE);
+        nextButton.setVisibility(View.VISIBLE);
+        previousButton.setVisibility(View.VISIBLE);
         if(jsonReader!=null)
             loadMore();
         else
@@ -239,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
                 }catch (Exception e) {
 
-                    Toast.makeText(MainActivity.this,"There was an error",Toast.LENGTH_SHORT).show();
 
                 }finally {
                     try {
@@ -260,8 +264,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
                 if(displayArrayList.size()!=0)
                     userObjectArrayList.addAll(displayArrayList);
-                else
+                else {
                     retryButton.setVisibility(View.VISIBLE);
+                    nextButton.setVisibility(View.INVISIBLE);
+                    previousButton.setVisibility(View.INVISIBLE);
+                }
 
 
             }
@@ -269,10 +276,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                progressDialog.setTitle("Loading...");
-                progressDialog.show();
                 if (!isNetworkAvailable())
                     noNetworkFlag = true;
+                else {
+                    progressDialog.setTitle("Loading...");
+                    progressDialog.show();
+                }
 
             }
         }
@@ -304,8 +313,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
                 }catch (Exception e) {
 
-                    Toast.makeText(MainActivity.this,"There was an error",Toast.LENGTH_SHORT).show();
-
                 }
 
                 return result;
@@ -326,12 +333,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                progressDialog.setTitle("Loading...");
-                progressDialog.show();
                 if (!isNetworkAvailable())
                     noNetworkFlag = true;
-                else
+                else {
                     noNetworkFlag = false;
+                    progressDialog.setTitle("Loading...");
+                    progressDialog.show();
+                }
 
             }
         }
